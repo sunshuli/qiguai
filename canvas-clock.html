@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas时钟</title>
+    <style type="text/css">
+        #myCanvas {
+            display: block;
+            margin: 200px auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas">您的浏览器不支持canvas</canvas>
+</body>
+<script type="text/javascript">
+    //获取元素
+    var myCanvas = document.getElementById('myCanvas');
+    //设置画布的宽高
+    myCanvas.width =300;
+    myCanvas.height = 300;
+    var r = 150;
+
+    //获取canvas功能键
+    var ctx = myCanvas.getContext('2d');
+
+    //画表盘
+    function createBg() {
+        ctx.save();
+        //因为钟表是一个圆，所以为了方便我们编程，我们将canvas的中心点移到canvas画布正中间
+        ctx.translate(r,r);
+
+        ctx.beginPath();
+
+        //开始画圆
+        ctx.lineWidth = 10;
+        ctx.arc(0,0,r - 10,0,2 * Math.PI);
+        ctx.stroke();
+
+        //创建小点
+        for(var i = 0; i < 60; i++) {
+            var rad = 2 * Math.PI / 60 * i; //计算每个小点的圆心角
+            var x = Math.cos(rad) * (r - 20); //计算每个小点的x坐标值
+            var y = Math.sin(rad) * (r - 20); //计算每个小点的y坐标值
+            //绘制小点(5的倍数的小点颜色为黑色，其他为灰色)
+            ctx.beginPath(); //重新开始一条路径
+            if(i % 5 == 0) {
+                ctx.fillStyle = '#000';
+                ctx.arc(x,y,2,0,2 * Math.PI);
+            }else {
+                ctx.fillStyle = '#ccc';
+                ctx.arc(x,y,2,0,2 * Math.PI);
+            }
+            ctx.fill();
+        }
+
+        //创建数字
+        var hourNums = [3,4,5,6,7,8,9,10,11,12,1,2]; //将要绘制的小时数存到一个数组里，方便循环创建，因为x轴的起始位置是3，所以这个数组以3开始
+        hourNums.forEach(function(num,i) {
+            var rad = 2 * Math.PI / 12 * i; //计算每个数字对应圆心角
+            var x = Math.cos(rad) * (r - 32);
+            var y = Math.sin(rad) * (r - 32);
+            ctx.beginPath(); //重新开始一条路径
+            ctx.font = '17px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center'; //让字体左右居中
+            ctx.textBaseline = 'middle'; //让字体的基线对其方式为中心对齐
+            ctx.fillText(num,x,y); //绘制数字，ctx.fillText(word,x,y);
+        });
+
+    }
+
+    //时针
+    function createHour(hour,minute) {
+        ctx.save();
+        var hrad = 2 * Math.PI / 12 * hour;
+        var mrad = 2 * Math.PI / 60 / 60 * minute;
+        ctx.rotate(hrad + mrad);
+        ctx.beginPath();
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round'; //让线的两端变成圆角
+        ctx.moveTo(0,10); //起始位置，表盘中心往下一点
+        ctx.lineTo(0, - r / 2); //结束位置半径除2
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    //分针
+    function createMinute(minute,second) {
+        ctx.save();
+        var mrad = 2 * Math.PI / 60 * minute;
+        var srad = 2 * Math.PI / 60 / 60 * second;
+        ctx.rotate(mrad + srad);
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.moveTo(0,12);
+        ctx.lineTo(0, - (r / 2 + 30));
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    //秒针
+    function createSecond(second) {
+        ctx.save();
+        var srad = 2 * Math.PI / 60 * second;
+        ctx.rotate(srad);
+        ctx.beginPath();
+        ctx.fillStyle = '#f00';
+        ctx.moveTo(-2,20);
+        ctx.lineTo(2,20);
+        ctx.lineTo(1, - (r / 2 + 35));
+        ctx.lineTo(-1, - (r / 2 + 35));
+        ctx.fill();
+        ctx.restore();
+    }
+
+    //中心小圆
+    function smallCircle() {
+        ctx.beginPath();
+        ctx.fillStyle = '#fff';
+        ctx.arc(0,0,3,0,2 * Math.PI);
+        ctx.fill();
+    }
+    smallCircle();
+
+    // 获取时间，调用所有方法
+    function draw() {
+        ctx.restore();
+        //获取当前时间
+        var nowDate = new Date();
+        var hour = nowDate.getHours();
+        var minute = nowDate.getMinutes();
+        var second = nowDate.getSeconds();
+
+        //每次绘制之前先清理画布
+        ctx.clearRect(0,0,myCanvas.width,myCanvas.height);
+        //绘制钟表
+        createBg();
+        createHour(hour,minute);
+        createMinute(minute,second);
+        createSecond(second);
+        smallCircle();
+    }
+    draw();
+    var timer = setInterval(draw,1000);
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--  -->
